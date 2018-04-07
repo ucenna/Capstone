@@ -10,8 +10,21 @@ class ClientSocket:
         else:
             self.sock = sock
 
-    def connect(self, host, port):
-        self.sock.connect((host, port))
+    def recvfrom(self, bufsize):
+        msg, addr = self.sock.recvfrom(bufsize)
+        sockname = str(self.sock.getsockname())
+        remotename = str(addr[0])+str(addr[1].decode('ascii'))
+        print('## '+msg.decode('ascii')+' : '+sockname+' <= '+remotename)
+        return msg, addr
+
+    def sendto(self, msg, host_port_tuple):
+        sockname = str(self.sock.getsockname())
+        remotename = str(host_port_tuple)
+        print('## '+msg.decode('ascii')+' : '+sockname+' => '+remotename)
+        self.sock.sendto(msg, host_port_tuple)
+
+    def connect(self, host_port_tuple):
+        self.sock.connect(host_port_tuple)
 
     def send(self, msg):
         self.sock.send(msg)
@@ -19,8 +32,8 @@ class ClientSocket:
         remotename = str(self.sock.getpeername())
         print('## '+msg.decode('ascii')+' : '+sockname+' => '+remotename)
 
-    def recv(self, length):
-        msg = self.sock.recv(length)
+    def recv(self, bufsize):
+        msg = self.sock.recv(bufsize)
         sockname = str(self.sock.getsockname())
         remotename = str(self.sock.getpeername())
         print('## '+msg.decode('ascii')+' : '+sockname+' <= '+remotename)
@@ -37,8 +50,8 @@ class ServerSocket:
         else:
             self.sock = sock
 
-    def bind(self, host, port):
-        self.sock.bind((host, port))
+    def bind(self, host_port_tuple):
+        self.sock.bind(host_port_tuple)
 
     def listen(self, x):
         self.sock.listen(x)
