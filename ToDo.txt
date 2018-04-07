@@ -1,0 +1,15 @@
+Wireless connection between phone and raspberry pi (UPNP)
+TV App that displays phone content
+--Weather
+--Email
+--From Phone:
+----Text
+----Photo
+----Website
+----YouTube
+Phone App that displays controls
+--Navigation(Up, down, left, right)
+--Jump To(Go to weather tab)
+--Paint App(Paint to screen)
+--Send File(Photo, Movie)
+--URL(Got to URL)
