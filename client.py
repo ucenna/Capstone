@@ -2,7 +2,7 @@ import CtrlSocket
 
 s = CtrlSocket.ClientSocket(CtrlSocket.UDPConnection)
 
-host = '127.0.0.1'
+host = CtrlSocket.socket.gethostname()
 port = 9999
 
 # s.connect((host, port))
