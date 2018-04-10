@@ -26,8 +26,10 @@ class ClientSocket(BaseSocket):
     def sendto(self, msg, host_port_tuple):
         sockname = 'here'
         remotename = str(host_port_tuple)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         print('## '+msg.decode('ascii')+' : '+sockname+' => '+remotename)
         self.sock.sendto(msg, host_port_tuple)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
 
     def connect(self, host_port_tuple):
         self.sock.connect(host_port_tuple)
