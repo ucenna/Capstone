@@ -1,24 +1,30 @@
 import socket
 
 MSGLEN = 1024
+UDPConnection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
-class ClientSocket:
+class BaseSocket:
     def __init__(self, sock=None):
         if sock is None:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         else:
             self.sock = sock
 
+    def close(self):
+        self.sock.close()
+
     def recvfrom(self, bufsize):
         msg, addr = self.sock.recvfrom(bufsize)
-        sockname = str(self.sock.getsockname())
-        remotename = str(addr[0])+str(addr[1].decode('ascii'))
-        print('## '+msg.decode('ascii')+' : '+sockname+' <= '+remotename)
+        # sockname = str(self.sock.getsockname())
+        # remotename = str(addr[0])+str(addr[1].decode('ascii'))
+        # print('## '+msg.decode('ascii')+' : '+sockname+' <= '+remotename)
         return msg, addr
 
+
+class ClientSocket(BaseSocket):
     def sendto(self, msg, host_port_tuple):
-        sockname = str(self.sock.getsockname())
+        sockname = 'here'
         remotename = str(host_port_tuple)
         print('## '+msg.decode('ascii')+' : '+sockname+' => '+remotename)
         self.sock.sendto(msg, host_port_tuple)
@@ -39,17 +45,8 @@ class ClientSocket:
         print('## '+msg.decode('ascii')+' : '+sockname+' <= '+remotename)
         return msg
 
-    def close(self):
-        self.sock.close()
 
-
-class ServerSocket:
-    def __init__(self, sock=None):
-        if sock is None:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
-
+class ServerSocket(BaseSocket):
     def bind(self, host_port_tuple):
         self.sock.bind(host_port_tuple)
 

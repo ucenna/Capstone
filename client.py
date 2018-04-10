@@ -1,13 +1,13 @@
 import CtrlSocket
 
-s = CtrlSocket.ClientSocket()
+s = CtrlSocket.ClientSocket(CtrlSocket.UDPConnection)
 
-host = CtrlSocket.socket.gethostname()
+host = '127.0.0.1'
 port = 9999
 
-s.connect((host, port))
+# s.connect((host, port))
 
 sendMsg = 'kill'
 sendMsg = sendMsg.encode('ascii')
-s.sendto(sendMsg, ('255.255.255.255', 9999))
+s.sendto(sendMsg, (host, port))
 s.close()
