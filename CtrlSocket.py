@@ -7,53 +7,104 @@ UDPConnection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 class BaseSocket:
     def __init__(self, sock=None):
         if sock is None:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.setSock(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
         else:
-            self.sock = sock
+            self.setSock(sock)
+        self.alive = True
+        self.name = socket.gethostname()+'(here)'
+
+    def setSock(self, sock):
+        self.sock = sock
+
+    def execute(self, cmd):
+        print("## executing: "+cmd)
+        try:
+            result = getattr(self, cmd)()
+            successMsg = str(result)
+            if result is None:
+                successMsg = 'Success'
+            print('## result: '+successMsg)
+            return result
+        except AttributeError:
+            print('## result: No such cmd')
+
+    def getSock(self):
+        return self.sock
+
+    def setName(self, name):
+        self.name = name
+
+    def getName(self):
+        return self.name
+
+    def kill(self):
+        print('## killing self')
+        self.alive = False
 
     def close(self):
         self.sock.close()
 
+    def send(self, msg):
+        self.sock.send(msg)
+        remotename = str(self.sock.getpeername())
+        print('## '+msg.decode('ascii')+' : '+self.name+' => '+remotename)
+
+    def recv(self, bufsize):
+        msg = self.sock.recv(bufsize)
+        remotename = str(self.sock.getpeername())
+        print('## '+msg.decode('ascii')+' : '+self.name+' <= '+remotename)
+        return msg
+
     def recvfrom(self, bufsize):
         msg, addr = self.sock.recvfrom(bufsize)
-        # sockname = str(self.sock.getsockname())
-        # remotename = str(addr[0])+str(addr[1].decode('ascii'))
-        # print('## '+msg.decode('ascii')+' : '+sockname+' <= '+remotename)
+        remotename = str(addr)
+        print('## '+msg.decode('ascii')+' : '+self.name+' <= '+remotename)
         return msg, addr
 
 
 class ClientSocket(BaseSocket):
-    def sendto(self, msg, host_port_tuple):
-        sockname = 'here'
-        remotename = str(host_port_tuple)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        print('## '+msg.decode('ascii')+' : '+sockname+' => '+remotename)
-        self.sock.sendto(msg, host_port_tuple)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
+    def sendto(self, msg, addr):
+        remotename = str(addr)
+        print('## '+msg.decode('ascii')+' : '+self.name+' => '+remotename)
+        self.sock.sendto(msg, addr)
 
-    def connect(self, host_port_tuple):
-        self.sock.connect(host_port_tuple)
+    def connect(self, addr):
+        self.sock.connect(addr)
 
     def send(self, msg):
         self.sock.send(msg)
-        sockname = str(self.sock.getsockname())
         remotename = str(self.sock.getpeername())
-        print('## '+msg.decode('ascii')+' : '+sockname+' => '+remotename)
+        print('## '+msg.decode('ascii')+' : '+self.name+' => '+remotename)
 
     def recv(self, bufsize):
         msg = self.sock.recv(bufsize)
-        sockname = str(self.sock.getsockname())
         remotename = str(self.sock.getpeername())
-        print('## '+msg.decode('ascii')+' : '+sockname+' <= '+remotename)
+        print('## '+msg.decode('ascii')+' : '+self.name+' <= '+remotename)
         return msg
+
+    def broadcast(self, msg, port=None):
+        if port is None:
+            port = self.port
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.sendto(msg, ('<broadcast>', port))
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
 
 
 class ServerSocket(BaseSocket):
-    def bind(self, host_port_tuple):
-        self.sock.bind(host_port_tuple)
+    def bind(self, addr):
+        self.sock.bind(addr)
 
     def listen(self, x):
         self.sock.listen(x)
+
+    def ListenForBroadcast(self):
+        data, addr = self.recvfrom(1024)
+        msg = None
+        try:
+            msg = data.decode('ascii')
+        except UnicodeDecodeError:
+            return
+        return msg
 
     def accept(self):
         socket, addr = self.sock.accept()

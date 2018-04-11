@@ -2,12 +2,12 @@ import CtrlSocket
 
 s = CtrlSocket.ClientSocket(CtrlSocket.UDPConnection)
 
-host = '<broadcast>'
+host = CtrlSocket.socket.gethostname()
 port = 9999
 
-# s.connect((host, port))
+s.connect((host, port))
 
-sendMsg = 'kill'
+sendMsg = 'OPENCAST kill'
 sendMsg = sendMsg.encode('ascii')
-s.sendto(sendMsg, (host, port))
+s.broadcast(sendMsg, port)
 s.close()

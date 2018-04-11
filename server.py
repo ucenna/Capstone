@@ -1,4 +1,5 @@
 import CtrlSocket
+import OpenCastCmd
 
 serversocket = CtrlSocket.ServerSocket(CtrlSocket.UDPConnection)
 
@@ -10,12 +11,13 @@ serversocket.bind((host, port))
 
 # serversocket.listen(5)
 
-alive = True
-while alive:
-    data, addr = serversocket.recvfrom(1024)
-    print('## '+data.decode('ascii')+' : '+str(addr))
-    if data.decode('ascii') == 'kill':
-        alive = False
+
+while serversocket.alive:
+    msg = serversocket.ListenForBroadcast()
+    cmd = OpenCastCmd.process(msg)
+    serversocket.execute(cmd)
+    if msg is 'kill':
+        serversocket.alive = False
     # clientsocket, addr = serversocket.accept()
     # print('## Got Connection')
     # msg = 'Thank you for connecting' + str(addr) + '\r\n'
