@@ -1,40 +1,45 @@
 import socket
 
 MSGLEN = 1024
-UDPConnection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
 class BaseSocket:
     def __init__(self, sock=None):
         if sock is None:
-            self.setSock(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         else:
-            self.setSock(sock)
+            self.sock = sock
         self.alive = True
         self.name = socket.gethostname()+'(here)'
 
-    def setSock(self, sock):
+    def setsock(self, sock):
         self.sock = sock
 
-    def execute(self, cmd):
+    def getsock(self):
+        return self.sock
+
+    def execute(self, cmd, *args):
         print("## executing: "+cmd)
+        print('## cmd: '+cmd)
+        print('## args: '+str(*args))
         try:
-            result = getattr(self, cmd)()
+            if args:
+                result = getattr(self, cmd)(*args)
+            else:
+                result = getattr(self, cmd)()
             successMsg = str(result)
             if result is None:
                 successMsg = 'Success'
             print('## result: '+successMsg)
             return result
         except AttributeError:
-            print('## result: No such cmd')
+            print('## Result: Error: No such cmd')
 
-    def getSock(self):
-        return self.sock
-
-    def setName(self, name):
+    def setname(self, name):
         self.name = name
 
-    def getName(self):
+    def getname(self):
         return self.name
 
     def kill(self):
@@ -85,9 +90,10 @@ class ClientSocket(BaseSocket):
     def broadcast(self, msg, port=None):
         if port is None:
             port = self.port
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.sendto(msg, ('<broadcast>', port))
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
+        broadcastSocket = UDPSocket
+        broadcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        broadcastSocket.sendto(msg, ('<broadcast>', port))
+        broadcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
 
 
 class ServerSocket(BaseSocket):
@@ -97,8 +103,11 @@ class ServerSocket(BaseSocket):
     def listen(self, x):
         self.sock.listen(x)
 
-    def ListenForBroadcast(self):
-        data, addr = self.recvfrom(1024)
+    def recvbroadcast(self):
+        broadcastSocket = UDPSocket
+        broadcastSocket.bind(('0.0.0.0', 9999))
+        data, addr = broadcastSocket.recvfrom(1024)
+        broadcastSocket.close()
         msg = None
         try:
             msg = data.decode('ascii')

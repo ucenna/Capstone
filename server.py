@@ -1,7 +1,7 @@
 import CtrlSocket
 import OpenCastCmd
 
-serversocket = CtrlSocket.ServerSocket(CtrlSocket.UDPConnection)
+serversocket = CtrlSocket.ServerSocket()
 
 host = '0.0.0.0'
 port = 9999
@@ -13,9 +13,12 @@ serversocket.bind((host, port))
 
 
 while serversocket.alive:
-    msg = serversocket.ListenForBroadcast()
-    cmd = OpenCastCmd.process(msg)
-    serversocket.execute(cmd)
+    msg = serversocket.recvbroadcast()
+    cmds = OpenCastCmd.process(msg)
+    for cmdarr in cmds:
+        cmd = cmdarr[0]
+        args = cmdarr[1]
+        serversocket.execute(cmd, *args)
     if msg is 'kill':
         serversocket.alive = False
     # clientsocket, addr = serversocket.accept()
