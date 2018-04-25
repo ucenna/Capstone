@@ -2,7 +2,7 @@ from pymouse import PyMouse
 from pykeyboard import PyKeyboard
 
 
-class clientInput:
+class ctrlInput:
     m = PyMouse()
     k = PyKeyboard()
 
@@ -21,10 +21,22 @@ class clientInput:
             y = 0
         self.m.move(self.pos_x() + x, self.pos_y() + y)
 
+    def click_left(self):
+        self.m.click(self.pos_x(), self.pos_y(), 1)
+
+    def click_right(self):
+        self.m.click(self.pos_x(), self.pos_y(), 2)
+
+    def click_middle(self):
+        self.m.click(self.pos_x(), self.pos_y(), 3)
+
+    def type(self, string):
+        self.k.type_string(string)
+
     def execute(self, cmd, *args):
         print("## executing: "+cmd)
         print('## cmd: '+cmd)
-        print('## args: '+str(*args))
+        # print('## args: '+str(*args))
         try:
             if args:
                 result = getattr(self, cmd)(*args)

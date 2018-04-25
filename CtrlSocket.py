@@ -1,10 +1,16 @@
 import socket
+import ctrlInput
 
 MSGLEN = 1024
-UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
+def UDPSocket():
+    return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
 class BaseSocket:
+    input = ctrlInput.ctrlInput()
+
     def __init__(self, sock=None):
         if sock is None:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,7 +28,7 @@ class BaseSocket:
     def execute(self, cmd, *args):
         print("## executing: "+cmd)
         print('## cmd: '+cmd)
-        print('## args: '+str(*args))
+        # print('## args: '+str(*args))
         try:
             if args:
                 result = getattr(self, cmd)(*args)
@@ -34,7 +40,7 @@ class BaseSocket:
             print('## result: '+successMsg)
             return result
         except AttributeError:
-            print('## Result: Error: No such cmd')
+            self.input.execute(cmd, *args)
 
     def setname(self, name):
         self.name = name
@@ -90,7 +96,7 @@ class ClientSocket(BaseSocket):
     def broadcast(self, msg, port=None):
         if port is None:
             port = self.port
-        broadcastSocket = UDPSocket
+        broadcastSocket = UDPSocket()
         broadcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         broadcastSocket.sendto(msg, ('<broadcast>', port))
         broadcastSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
@@ -104,7 +110,7 @@ class ServerSocket(BaseSocket):
         self.sock.listen(x)
 
     def recvbroadcast(self):
-        broadcastSocket = UDPSocket
+        broadcastSocket = UDPSocket()
         broadcastSocket.bind(('0.0.0.0', 9999))
         data, addr = broadcastSocket.recvfrom(1024)
         broadcastSocket.close()

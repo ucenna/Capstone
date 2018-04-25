@@ -1,12 +1,10 @@
 import CtrlSocket
 import OpenCastCmd
-import clientInput
+import ctrlInput
 
 serversocket = CtrlSocket.ServerSocket()
-serverControl = clientInput
 host = '0.0.0.0'
 port = 9999
-
 
 serversocket.bind((host, port))
 
@@ -19,7 +17,6 @@ while serversocket.alive:
     for cmdarr in cmds:
         cmd = cmdarr[0]
         args = cmdarr[1]
-        serverControl.execute(cmd, *args)
         serversocket.execute(cmd, *args)
     if msg is 'kill':
         serversocket.alive = False
