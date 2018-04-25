@@ -27,8 +27,6 @@ class BaseSocket:
 
     def execute(self, cmd, *args):
         print("## executing: "+cmd)
-        print('## cmd: '+cmd)
-        # print('## args: '+str(*args))
         try:
             if args:
                 result = getattr(self, cmd)(*args)
