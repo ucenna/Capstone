@@ -1,0 +1,12 @@
+<RunCMD>:           #creates reference to 'RunCMD' class in 'main.py' file(ignore syntax error in Atom.io)
+# create properties of button
+    lbl: firefox_btn
+    BoxLayout:
+        orientation: 'vertical'
+
+        Button:
+            text: 'Open Firefox'
+            on_press: root.openFirefox()
+
+        Label:
+            id: firefox_btn
