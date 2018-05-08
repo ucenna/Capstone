@@ -19,7 +19,9 @@ class ctrlInput:
             x = 0
         if y is None:
             y = 0
-        self.m.move(self.pos_x() + x, self.pos_y() + y)
+        if x > 25 or y > 25 or x < -25 or y < -25:
+            return
+        self.m.move(self.pos_x() - x, self.pos_y() + y)
 
     def click_left(self):
         self.m.click(self.pos_x(), self.pos_y(), 1)
